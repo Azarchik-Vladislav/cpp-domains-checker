@@ -29,10 +29,7 @@ public:
     }
 
     bool IsSubdomain(const Domain& other) const {
-        return domain_.substr(0, other.domain_.size()) == other.domain_ ? true : false; //зачем тернарная операция? 
-                                //достаточно просто вернуть domain_.substr(0, other.domain_.size()) == other.domain_ Результат этой операции - булево значение.
-                                // bool result = domain_.substr(0, other.domain_.size()) == other.domain_; Но лишняя перменная не нужна. Поэтому можно вернуть выражение
-                                // Иначе масло маслянное получается.
+        return domain_.substr(0, other.domain_.size()) == other.domain_;
     } 
 private:
     string domain_;
@@ -59,8 +56,8 @@ public:
     bool IsForbidden(const Domain& domain) {
         auto forbidden_domain = upper_bound(forbidden_domains_.begin(), forbidden_domains_.end(), domain);
 
-        return  !(forbidden_domain == forbidden_domains_.begin()) //тоже самое
-                && domain.IsSubdomain(*prev(forbidden_domain)) ? true : false;
+        return  !(forbidden_domain == forbidden_domains_.begin())
+                && domain.IsSubdomain(*prev(forbidden_domain));
     }
 private:
     vector<Domain> forbidden_domains_;
