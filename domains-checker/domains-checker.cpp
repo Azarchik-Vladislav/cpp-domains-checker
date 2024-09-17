@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <string_view>
+#include <string_view> 
 #include <vector>
 
 using namespace std;
@@ -28,7 +28,7 @@ public:
     }
 
     bool IsSubdomain(const Domain& other) const {
-        if(domain_.substr(0, other.domain_.size()) == other.domain_) {
+        if(domain_.substr(0, other.domain_.size()) == other.domain_) {  //можно просто вернуть вулево значение domain_.substr(0, other.domain_.size()) == other.domain_
             return true;
         }
 
@@ -55,7 +55,7 @@ public:
     bool IsForbidden(const Domain& domain) {
         auto forbidden_domain = upper_bound(forbidden_domains_.begin(), forbidden_domains_.end(), domain);
 
-        if(forbidden_domain == forbidden_domains_.begin()) {
+        if(forbidden_domain == forbidden_domains_.begin()) { //тоже вместо проверки вернуть булево значение как && двух выражений, добавив к первому отрицание
             return false;
         } else {
             return  domain.IsSubdomain(*prev(forbidden_domain));
@@ -88,7 +88,7 @@ Number ReadNumberOnLine(istream& input) {
 
     return num;
 }
-
+// По честному - нужны тесты ещё.
 int main() {
     const std::vector<Domain> forbidden_domains = ReadDomains(cin, ReadNumberOnLine<size_t>(cin));
     DomainChecker checker(forbidden_domains.begin(), forbidden_domains.end());
