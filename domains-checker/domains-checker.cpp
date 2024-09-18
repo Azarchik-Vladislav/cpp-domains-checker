@@ -1,8 +1,9 @@
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <string_view>
+#include <string_view> 
 #include <vector>
 
 using namespace std;
@@ -28,11 +29,7 @@ public:
     }
 
     bool IsSubdomain(const Domain& other) const {
-        if(domain_.substr(0, other.domain_.size()) == other.domain_) {
-            return true;
-        }
-
-        return false;
+        return domain_.substr(0, other.domain_.size()) == other.domain_;
     } 
 private:
     string domain_;
@@ -52,14 +49,15 @@ public:
         forbidden_domains_.erase(not_unique_domains, forbidden_domains_.end());
     }
 
+    const vector<Domain>& GetForbiddenDomains() {
+        return forbidden_domains_;
+    }
+
     bool IsForbidden(const Domain& domain) {
         auto forbidden_domain = upper_bound(forbidden_domains_.begin(), forbidden_domains_.end(), domain);
 
-        if(forbidden_domain == forbidden_domains_.begin()) {
-            return false;
-        } else {
-            return  domain.IsSubdomain(*prev(forbidden_domain));
-        }
+        return  !(forbidden_domain == forbidden_domains_.begin())
+                && domain.IsSubdomain(*prev(forbidden_domain));
     }
 private:
     vector<Domain> forbidden_domains_;
@@ -89,12 +87,65 @@ Number ReadNumberOnLine(istream& input) {
     return num;
 }
 
-int main() {
-    const std::vector<Domain> forbidden_domains = ReadDomains(cin, ReadNumberOnLine<size_t>(cin));
-    DomainChecker checker(forbidden_domains.begin(), forbidden_domains.end());
+void TestCorrectSubdomainDefinition() {
+    Domain domain_1("free.gdz.ru"s);
 
-    const std::vector<Domain> test_domains = ReadDomains(cin, ReadNumberOnLine<size_t>(cin));
-    for (const Domain& domain : test_domains) {
-        cout << (checker.IsForbidden(domain) ? "Bad"sv : "Good"sv) << endl;
+    { 
+        Domain domain_2("freegdz.ru"s);
+        Domain domain_3("math.freegdz.ru");
+
+        assert(!domain_1.IsSubdomain(domain_2));
+        assert(!domain_3.IsSubdomain(domain_1));
+
+        assert(!domain_2.IsSubdomain(domain_1));
     }
+
+    {
+        Domain domain_2("gdz.ru"s);
+        Domain domain_3("math.free.gdz.ru");
+        assert(domain_3.IsSubdomain(domain_1));
+        assert(domain_1.IsSubdomain(domain_2));
+        assert(domain_3.IsSubdomain(domain_2));
+    }
+}
+
+void TestSortAndUniqueDomains() {
+    {
+        string domains = "gdz.ru m.gdz.ru free.gdz.ru com\n"s;
+        istringstream str(domains);
+
+        istringstream count("2");
+
+        vector<Domain> forbidden_domains = ReadDomains(str, ReadNumberOnLine<size_t>(count));
+        DomainChecker checker(forbidden_domains.begin(), forbidden_domains.end());
+        assert(checker.GetForbiddenDomains().size() == 2);
+    }
+
+}
+
+void TestCheckForbiddenDomains() {
+    string domains = "gdz.ru\nm.gdz.ru\nfree.gdz.ru\ncom"s;
+    istringstream str(domains);
+
+    istringstream count("4");
+
+    vector<Domain> forbidden_domains = ReadDomains(str, ReadNumberOnLine<size_t>(count));
+    DomainChecker checker(forbidden_domains.begin(), forbidden_domains.end());
+    {
+        Domain domain_1("map.com"s);
+        Domain domain_2("gdz.ru"s);
+        Domain domain_3("ru"s);
+
+        assert(checker.IsForbidden(domain_1));
+        assert(checker.IsForbidden(domain_2));
+
+        assert(!checker.IsForbidden(domain_3));
+    }
+}
+
+int main() {
+    TestCorrectSubdomainDefinition();
+    TestSortAndUniqueDomains();
+    TestCheckForbiddenDomains();
+    return 0;
 }
